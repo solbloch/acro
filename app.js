@@ -1,16 +1,20 @@
-const express = require("express");
-const http = require("http");
-const socketIo = require("socket.io");
+const io = require('socket.io')({
+  path: '/ws',
+  serveClient: false,
+})
 
+const server = require('http').createServer()
 
-const port = process.env.PORT || 4000;
+io.attach(server, {
+})
 
-const index = require("./routes/index");
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('create', (room) => {
+        socket.join(room);
+        let rooms = Object.keys(socket.rooms)
+        console.log(rooms);
+    });
+});
 
-
-const app = express();
-app.use(index);
-
-const server = http.createServer(app);
-
-const io = socketIo(server);
+server.listen(4000);
