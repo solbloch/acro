@@ -1,35 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import io from "socket.io-client";
+import Game from "./game";
+import Join from "./join";
 
-function App() {
-  return <div><Join onSubmit={"e.preventDefault(); alert('tester');"} /></div>;
-}
+function App(){
+  const [room,setRoom] = useState('');
+  const [name,setName] = useState('');
 
-function Game({text}) {
-  return <div>{text}</div>;
-}
-
-function Join({onSubmit}) {
-    let socket = io('http://localhost:4000', {
-        path: '/ws'
-    });
-
-    let input = React.createRef();
-
-    function connect(e){
-        e.preventDefault();
-        socket.emit('create', input.current.value);
-    }
-
-    return (
-        <div>
-        <form onSubmit= {connect} >
-            <label>room id</label>
-            <input type="text" ref={input} />
-            <input type="submit" value="Submit" />
-        </form>
-    </div>);
+  return (room.length === 0 ?
+    <Join onJoin={(room,name) => {
+      setRoom(room);
+      setName(name);}} /> :
+    <Game room={room} name={name} />
+  );
 }
 
 ReactDOM.render(<App />, document.body);

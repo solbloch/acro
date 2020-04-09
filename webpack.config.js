@@ -4,14 +4,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   mode: 'development',
   devServer: {
-    contentBase: path.join(__dirname, "dist/client.js"),
+    contentBase: path.join(__dirname, "dist"),
     compress: true,
+    host: '0.0.0.0',
     port: 9000,
-    proxy: { 
-        '/napi/*': { 
-            target: 'ws://localhost:4000',
-            ws: true,
-        },
     },
   },
   entry: {
