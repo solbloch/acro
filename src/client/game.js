@@ -77,10 +77,6 @@ function Game({ room,name }){
       ACRO: {roomState.acro}
       <br></br>
       {renderGame()}
-      <br></br>
-      <br></br>
-      <br></br>
-      <br></br>
     </div>
   );
 }

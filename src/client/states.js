@@ -164,17 +164,19 @@ function ViewRound({ room,roomState,name,socket }){
 function ViewSummary({ room,roomState,name,socket }){
   let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
 
-  let winners = [];
-  for(let user in sorted){
-      winners.push(<div key={sorted[user].name}>
-        user: {sorted[user].name} scored: {sorted[user].points}
-        </div>);
-  }
+  let winners = sorted.map(user => {
+    return <li key={user.name}>
+      user: {user.name} has {user.points} points
+      </li>; 
+  });
+
   return(
     <div>
-    timer: {roomState.time} <br></br>
-    point leaders: <br></br>
-    {winners}
+      timer: {roomState.time} <br></br>
+      current point leaders: <br></br>
+      <ol>
+        {winners}
+      <ol>
     </div>
   );
 }
