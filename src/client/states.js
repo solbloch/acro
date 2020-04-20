@@ -176,7 +176,7 @@ function ViewSummary({ room,roomState,name,socket }){
       current point leaders: <br></br>
       <ol>
         {winners}
-      <ol>
+      </ol>
     </div>
   );
 }
