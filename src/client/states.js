@@ -143,12 +143,10 @@ function ViewRound({ room,roomState,name,socket }){
       voteNum[highestPlayer[i]] += roomState.acro.length;
     }
 
-    let sortedList = Object.entries(voteNum).sort((a,b) => b[1] - a[1]).map(user => {
-      return [roomState.users[user[0]].name, user[1]];
-    });
+    let sortedList = Object.entries(voteNum).sort((a,b) => b[1] - a[1]);
 
     return sortedList.map(user => {
-      return <li>{user[0]} has {user[1]}</li>;
+      return <li>{roomState.users[user[0]].name} got {user[1]} with {roomState.users[user[0]].answer}</li>;
     });
 
   }
@@ -174,7 +172,7 @@ function ViewSummary({ room,roomState,name,socket }){
   }
   return(
     <div>
-    timer: {roomState.time}
+    timer: {roomState.time} <br></br>
     point leaders: <br></br>
     {winners}
     </div>
