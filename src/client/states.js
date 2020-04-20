@@ -84,7 +84,7 @@ function Vote({ room,roomState,name,socket }){
   const votable = () => {
     if(!voteState){
       return Object.entries(roomState.users).map(([socketid,data]) => {
-        if(socketid != socket.id){
+        if(socketid != socket.id && roomState.users[socketid].answer.length > 0){
           return <button key={socketid} onClick={emitVote(socketid)}>
                    {roomState.users[socketid].answer}
                  </button>;
