@@ -82,11 +82,9 @@ const generateAcro = length => {
 const addPoints = (room) => {
   // NOTE: Votes are socketids.
   let votes = Object.values(rooms[room].users).map(user => user.vote);
-  console.log(`votes: ${votes}`);
 
   // Remove empty string votes.
   votes = votes.filter(vote => vote.length>0);
-  console.log(`cleaned votes: ${votes}`);
 
 
   let voteNum = {};
@@ -158,7 +156,6 @@ async function gameRun(room){
     for(timer = 30; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
       rooms[room].time = timer;
-      console.log(everyConnected(room, user=> user.vote.length > 0));
       if(everyConnected(room, user => user.vote.length > 0 )){
         break;
       }
@@ -233,7 +230,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`${socket.id} discon from ${roomConnection} ${nameConnection}`);
+    console.log(`${socket.id} username: ${nameConnection} disconnected from ${roomConnection}`);
     if (!(roomConnection ==='' && nameConnection === '')){
       disconnectUser(socket.id, roomConnection, nameConnection);
     }

@@ -75,7 +75,7 @@ function Game({ room,name }){
   return (
     <div>room id: {room} | name: {name}
       <br></br>
-      {roomState.acro === '' ? '' : roomState.acro}
+      {roomState.acro === '' ? '' : 'ACRO: ' + roomState.acro}
       <br></br>
       {renderGame()}
     </div>

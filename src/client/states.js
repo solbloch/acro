@@ -27,7 +27,7 @@ function Answer({ room,roomState,name,socket }){
   const answerRef = useRef();
 
   const acroCheck = txt => {
-    let words = txt.replace(/[!?.,;:]/g,'').trim().toUpperCase().split(/\s+/);
+    let words = txt.replace(/[!?.,;:-]/g,'').trim().toUpperCase().split(/\s+/);
     let matching = true;
     for(let i in roomState.acro){
       if(roomState.acro[i] != words[i][0]){
@@ -190,15 +190,18 @@ function ViewSummary({ room,roomState,name,socket }){
 function End({ room,roomState,name,socket }){
   let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
 
-  let winners = [];
-  for(let user in sorted){
-      winners.push(<div key={sorted[user].name}>
-        user: {sorted[user].name} scored: {sorted[user].points}
-        </div>);
-  }
+  let winners = sorted.map(user => {
+    return <li key={user.name}>
+      user: {user.name} has {user.points} points
+      </li>; 
+  });
+
   return(
     <div>
-    {winners}
+      winners: <br></br>
+      <ol>
+        {winners}
+      </ol>
     </div>
   );
 }
