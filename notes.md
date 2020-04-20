@@ -2,7 +2,6 @@
 
 ## game states
 * waiting phase
-* topic given
 * answer / waiting 
 * voting
 

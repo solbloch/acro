@@ -8,7 +8,6 @@ module.exports = {
     compress: true,
     host: '0.0.0.0',
     port: 9000,
-    },
   },
   entry: {
     client: "./src/client/index.js",

@@ -1,44 +1,87 @@
 import React, { useRef,useState,useEffect } from "react";
 import io from "socket.io-client";
+import { Answer, Join, Vote, ViewRound, ViewSummary, End } from "./states";
 
-const socket = io('http://192.168.1.170:4000', {
+const socket = io('0.0.0.0:4000', {
   path: '/ws'
 });
 
 function Game({ room,name }){
-  const [messages, setMessages] = useState([]);
-  const messageText = useRef();
+  const [roomState, setRoomState] = useState({});
 
   useEffect(() => {
-    const listener = (msg,room) => {
-      console.log([...messages,msg]);
-      setMessages([...messages,msg]);
+    const roomListener = (roomState) => {
+      console.log(roomState);
+      setRoomState(roomState);
     };
 
-    socket.on('msgRec', listener);
+    socket.on('updateRoom', roomListener);
 
     return () => {
-      socket.off('msgRec', listener);
+      socket.off('updateRoom', roomListener);
     };
-  }, [messages]);
+  }, [roomState]);
 
   useEffect(() => {
-    socket.emit('create', room, name);
+    socket.emit('join', room, name);
   }, [room,name]);
 
-  function send(e){
-    e.preventDefault();
-    socket.emit('msg', messageText.current.value, room);
+
+  const renderGame = () => {
+    switch (roomState.state){
+      case 'join':{
+        return <Join room={room} 
+                     name={name} 
+                     socket={socket} />;
+      }
+      case 'answer':{
+        return <Answer room={room} 
+                       roomState={roomState}
+                       name={name} 
+                       socket={socket} />;
+      }
+      case 'vote':{
+        return <Vote room={room} 
+                     roomState={roomState}
+                     name={name} 
+                     socket={socket} />;
+      }
+      case 'viewround':{
+        return <ViewRound room={room} 
+                          roomState={roomState}
+                          name={name} 
+                          socket={socket} />;
+
+      }
+      case 'viewsummary':{
+        return <ViewSummary room={room} 
+                            roomState={roomState}
+                            name={name} 
+                            socket={socket} />;
+      }
+      case 'end':{
+        return <End room={room} 
+                     roomState={roomState}
+                     name={name} 
+                     socket={socket} />;
+      }
+      default:{
+        break;
+      }
+    }
   }
 
   return (
-    <div>room id: { room } | name: {name}
-      <form onSubmit= {send} >
-        <label>send msg</label>
-        <input type="text" ref={messageText} />
-        <input type="submit" value="Submit" />
-      </form>
-      <div>{messages.toString()}</div>
+    <div>room id: {room} | name: {name}
+      <br></br>
+      ACRO: {roomState.acro}
+      <br></br>
+      {renderGame()}
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+    <div>{JSON.stringify(roomState)}</div>
     </div>
   );
 }
