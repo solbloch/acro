@@ -31,6 +31,7 @@ function Game({ room,name }){
     switch (roomState.state){
       case 'join':{
         return <Join room={room} 
+                     roomState={roomState}
                      name={name} 
                      socket={socket} />;
       }
@@ -74,7 +75,7 @@ function Game({ room,name }){
   return (
     <div>room id: {room} | name: {name}
       <br></br>
-      ACRO: {roomState.acro}
+      {roomState.acro === '' ? '' : roomState.acro}
       <br></br>
       {renderGame()}
     </div>

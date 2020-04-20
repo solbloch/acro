@@ -120,22 +120,23 @@ const addPoints = (room) => {
   }
 }
 
+const emitUpdate = (room) => {
+  io.to(room).emit('updateRoom', rooms[room]);
+}
+
 async function updateRoom(room) {
+  emitUpdate(room);
   if(Object.keys(rooms[room].users).length > 1 &&
     everyConnected(room, user => user.ready )){
     gameRun(room);
   }
 }
 
-const emitUpdate = (room) => {
-  io.to(room).emit('updateRoom', rooms[room]);
-}
-
 async function gameRun(room){
   // Once everyone is readied up.
 
   // Loop over 3 to final acro length.
-  for(let acroLength = 3; acroLength <= 4; acroLength++){
+  for(let acroLength = 3; acroLength <= 7; acroLength++){
     // Timer for answering.
     let timer = 0;
 
@@ -185,6 +186,7 @@ async function gameRun(room){
       emitUpdate(room);
     }
 
+    // Reset answers and votes.
     Object.values(rooms[room].users).map(user => {
       user.answer = '';
       user.vote = '';
@@ -192,6 +194,9 @@ async function gameRun(room){
 
     emitUpdate(room);
   }
+
+  rooms[room].state = 'end';
+  emitUpdate(room);
 }
 
 io.attach(server, { });

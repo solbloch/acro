@@ -1,7 +1,7 @@
 import React, { useRef,useState,useEffect } from "react";
 import io from "socket.io-client";
 
-function Join({ room,name,socket }){
+function Join({ room,roomState,name,socket }){
   const [readyState, setReadyState] = useState(false);
 
   const emitReady = () => {
@@ -9,9 +9,14 @@ function Join({ room,name,socket }){
     setReadyState(true);
   }
   return (
-    <button onClick={emitReady}
-            disabled={readyState}>
-    ready</button>
+    <div>
+      users joined: {Object.values(roomState.users).map(user => {
+        return <div>{user.name} - {user.ready ? 'ready' : 'not ready'}</div>; })}
+        <br></br>
+      <button onClick={emitReady}
+              disabled={readyState}>
+      ready</button>
+    </div>
   );
 }
 
