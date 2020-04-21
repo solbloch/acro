@@ -74,6 +74,20 @@ function Vote({ room,roomState,name,socket }){
   // voteState true if voted, false otherwise.
   const [voteState, setVoteState] = useState(false);
 
+  // Stolen from stackoverflow.
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const [voteableList, setVoteableList] = 
+    useState(shuffle(Object.entries(roomState.users).filter(([socketid,user]) => {
+      return user.answer.length > 0
+    })));
+
   const emitVote = (vote) => {
     return () => {
       setVoteState(true);
@@ -81,34 +95,28 @@ function Vote({ room,roomState,name,socket }){
     };
   }
 
-  const votable = () => {
-    if(!voteState){
-      return Object.entries(roomState.users).map(([socketid,data]) => {
-        if(socketid != socket.id && roomState.users[socketid].answer.length > 0){
-          return <button key={socketid} onClick={emitVote(socketid)}>
-                   {roomState.users[socketid].answer}
-                 </button>;
-        }
-        else {
-          return <button key={socketid} disabled='true'>
-                   {roomState.users[socketid].answer}
-                 </button>;
-        }
-      });
+  const buttonizeVoteable = (each) => {
+    let [socketid,user] = each;
+    if(socketid != socket.id){
+      return <button key={socketid} onClick={emitVote(socketid)}>
+               {user.answer}
+             </button>;
     }
     else {
-      return Object.entries(roomState.users).map(([socketid,data]) => {
-        return <button key={socketid} disabled='true'>
-                 {roomState.users[socketid].answer}
-               </button>;
-      });
+      return <button key={socketid} disabled='true' onClick={emitVote(socketid)}>
+               {user.answer}
+             </button>
     }
+  }
+
+  const voteButtons = () => {
+    return voteableList.map(buttonizeVoteable);
   }
 
   return (
     <div>
-    timer: {roomState.time} <br></br>
-    {votable()}
+      timer: {roomState.time} <br></br>
+      {voteButtons()}
     </div>);
 }
 

@@ -153,7 +153,7 @@ async function gameRun(room){
     // Timer for voting.
     rooms[room].state = 'vote';
 
-    for(timer = 30; timer > 0; timer--){
+    for(timer = 40; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
       rooms[room].time = timer;
       if(everyConnected(room, user => user.vote.length > 0 )){
