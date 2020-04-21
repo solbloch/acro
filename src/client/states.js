@@ -97,15 +97,15 @@ function Vote({ room,roomState,name,socket }){
 
   const buttonizeVoteable = (each) => {
     let [socketid,user] = each;
-    if(socketid != socket.id){
-      return <button key={socketid} onClick={emitVote(socketid)}>
+    if(socketid === socket.id || voteState){
+      return <div><button key={socketid} disabled='true' onClick={emitVote(socketid)}>
                {user.answer}
-             </button>;
+             </button></div>;
     }
     else {
-      return <button key={socketid} disabled='true' onClick={emitVote(socketid)}>
+      return <div><button key={socketid} onClick={emitVote(socketid)}>
                {user.answer}
-             </button>
+             </button></div>;
     }
   }
 

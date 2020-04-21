@@ -194,6 +194,7 @@ async function gameRun(room){
 
   rooms[room].state = 'end';
   emitUpdate(room);
+  delete rooms[room];
 }
 
 io.attach(server, { });

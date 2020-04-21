@@ -11,7 +11,6 @@ function Game({ room,name }){
 
   useEffect(() => {
     const roomListener = (roomState) => {
-      console.log(roomState);
       setRoomState(roomState);
     };
 

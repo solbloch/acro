@@ -6,7 +6,7 @@ function Join({ onJoin }){
 
   function connect(e){
     e.preventDefault();
-    onJoin(roomName.current.value, name.current.value);
+    onJoin(roomName.current.value.toUpperCase(), name.current.value);
   }
 
   return ( 
