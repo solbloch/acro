@@ -200,24 +200,24 @@ io.on('connection', (socket) => {
   });
 
   socket.on('ready', (room) => {
+    console.log(`READY: ${socket.id}, ${room}`);
     rooms[room].users[socket.id].ready = true;
     updateRoom(room);
   });
 
   socket.on('answer', (room, name, answer) => {
+    console.log(`ANS: ${socketid}, ${room}, ${answer}`);
     rooms[room].users[socket.id].answer = answer;
-    // updateRoom(room);
   });
 
 
   socket.on('vote', (room, socketid, vote) => {
-    // console.log(`${socketid} in ${room} voted for ${vote}`);
+    console.log(`VOTE: ${socketid}, ${room}, ${vote}`);
     rooms[room].users[socketid].vote = vote;
-    // updateRoom(room);
   });
 
   socket.on('disconnect', () => {
-    console.log(`${socket.id} username: ${nameConnection} disconnected from ${roomConnection}`);
+    console.log(`DISCONNECT: ${socketid}, ${roomConnection}, ${nameConnection}`);
     if (!(roomConnection ==='' && nameConnection === '')){
       disconnectUser(socket.id, roomConnection, nameConnection);
     }
