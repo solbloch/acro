@@ -1,3 +1,5 @@
+const acronym = require("./acro");
+
 const io = require('socket.io')({
   path: '/ws',
   serveClient: false,
@@ -70,15 +72,6 @@ const everyConnected = (room, func) => {
   return connectedUsers.every(func);
 }
 
-const generateAcro = length => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let acro = '';
-  for(let i = 0; i < length; i++){
-    acro += alphabet[Math.floor(Math.random()*26)]
-  }
-  return acro;
-}
-
 const addPoints = (room) => {
   // NOTE: Votes are socketids.
   let votes = Object.values(rooms[room].users).map(user => user.vote);
@@ -139,7 +132,7 @@ async function gameRun(room){
     let timer = 0;
 
     rooms[room].state = 'answer';
-    rooms[room].acro = generateAcro(acroLength);
+    rooms[room].acro = acronym.generateAcro(acroLength);
 
     for(timer = rooms[room].acro.length * 15; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
@@ -165,17 +158,8 @@ async function gameRun(room){
     addPoints(room);
 
 
-    // Viewing round.
+    // Viewing round scores.
     rooms[room].state = 'viewround';
-
-    for(timer = 10; timer > 0; timer--){
-      await new Promise(r => setTimeout(r,1000));
-      rooms[room].time = timer;
-      emitUpdate(room);
-    }
-
-    // Viewing summary.
-    rooms[room].state = 'viewsummary';
 
     for(timer = 10; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));

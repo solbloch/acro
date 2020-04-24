@@ -174,27 +174,6 @@ function ViewRound({ room,roomState,name,socket }){
   );
 }
 
-function ViewSummary({ room,roomState,name,socket }){
-  let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
-
-  let winners = sorted.map(user => {
-    return <li key={user.name}>
-      user: {user.name} has {user.points} points
-      </li>; 
-  });
-
-  return(
-    <div>
-      timer: {roomState.time} <br></br>
-      current point leaders: <br></br>
-      <ol>
-        {winners}
-      </ol>
-    </div>
-  );
-}
-
-
 function End({ room,roomState,name,socket }){
   let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
 
@@ -214,4 +193,4 @@ function End({ room,roomState,name,socket }){
   );
 }
 
-export { Answer, Join, Vote, ViewRound, ViewSummary, End };
+export { Answer, Join, Vote, ViewRound, End };

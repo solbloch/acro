@@ -1,17 +1,26 @@
 import React, { useRef,useState,useEffect } from "react";
 import io from "socket.io-client";
-import { Answer, Join, Vote, ViewRound, ViewSummary, End } from "./states";
+import { Answer, Join, Vote, ViewRound, End } from "./states";
 
-const socket = io('acro.solb.io', {
+const socket = io('192.168.1.30:5000', {
   path: '/ws'
 });
 
 function Game({ room,name }){
   const [roomState, setRoomState] = useState({});
+  const [winners, setWinners] = useState([]);
 
   useEffect(() => {
     const roomListener = (roomState) => {
       setRoomState(roomState);
+
+      let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
+
+      setWinners(sorted.map(user => {
+        return <li key={user.name}>
+                 {user.name} has {user.points} points!
+               </li>;
+      }));
     };
 
     socket.on('updateRoom', roomListener);
@@ -19,12 +28,11 @@ function Game({ room,name }){
     return () => {
       socket.off('updateRoom', roomListener);
     };
-  }, [roomState]);
+  }, [roomState, winners]);
 
   useEffect(() => {
     socket.emit('join', room, name);
   }, [room,name]);
-
 
   const renderGame = () => {
     switch (roomState.state){
@@ -53,12 +61,6 @@ function Game({ room,name }){
                           socket={socket} />;
 
       }
-      case 'viewsummary':{
-        return <ViewSummary room={room} 
-                            roomState={roomState}
-                            name={name} 
-                            socket={socket} />;
-      }
       case 'end':{
         return <End room={room} 
                      roomState={roomState}
@@ -77,6 +79,11 @@ function Game({ room,name }){
       {roomState.acro === '' ? '' : 'ACRO: ' + roomState.acro}
       <br></br>
       {renderGame()}
+      <br></br>
+      current point leaders: <br></br>
+      <ol>
+        {winners}
+      </ol>
     </div>
   );
 }
