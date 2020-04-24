@@ -55,14 +55,16 @@ const connectUser = (socketid,room,name) => {
 }
 
 const disconnectUser = (socketid,room,name) => {
-  if (rooms[room].users.hasOwnProperty(socketid))
-  { 
-    rooms[room].users[socketid].connected = false;
-    
-    // If all users disconnected, delete room.
-    if(Object.values(rooms[room].users).every(user => !user.connected)){
-      console.log(`room deleted: ${room}`);
-      delete rooms[room]; 
+  if(rooms.hasOwnProperty(room){
+    if (rooms[room].users.hasOwnProperty(socketid))
+    { 
+      rooms[room].users[socketid].connected = false;
+
+      // If all users disconnected, delete room.
+      if(Object.values(rooms[room].users).every(user => !user.connected)){
+        console.log(`room deleted: ${room}`);
+        delete rooms[room]; 
+      }
     }
   }
 }
