@@ -55,7 +55,7 @@ const connectUser = (socketid,room,name) => {
 }
 
 const disconnectUser = (socketid,room,name) => {
-  if(rooms.hasOwnProperty(room){
+  if(rooms.hasOwnProperty(room)){
     if (rooms[room].users.hasOwnProperty(socketid))
     { 
       rooms[room].users[socketid].connected = false;
