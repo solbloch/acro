@@ -206,7 +206,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('answer', (room, name, answer) => {
-    console.log(`ANS: ${socketid}, ${room}, ${answer}`);
+    console.log(`ANS: ${socket.id}, ${room}, ${answer}`);
     rooms[room].users[socket.id].answer = answer;
   });
 
@@ -217,7 +217,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`DISCONNECT: ${socketid}, ${roomConnection}, ${nameConnection}`);
+    console.log(`DISCONNECT: ${socket.id}, ${roomConnection}, ${nameConnection}`);
     if (!(roomConnection ==='' && nameConnection === '')){
       disconnectUser(socket.id, roomConnection, nameConnection);
     }
