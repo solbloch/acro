@@ -46,7 +46,7 @@ const connectUser = (socketid,room,name) => {
 
   // Note: this idiom exists in python (for else), but
   // not in JS. Maybe there's a bettter way?
-  
+  j
   if(!reconnected){
     addUser(socketid,room,name);
   }
@@ -56,8 +56,8 @@ const connectUser = (socketid,room,name) => {
 
 const disconnectUser = (socketid,room,name) => {
   if(rooms.hasOwnProperty(room)){
-    if (rooms[room].users.hasOwnProperty(socketid))
-    { 
+    if (rooms[room].users.hasOwnProperty(socketid)) { 
+
       rooms[room].users[socketid].connected = false;
 
       // If all users disconnected, delete room.
@@ -201,7 +201,9 @@ io.on('connection', (socket) => {
 
   socket.on('ready', (room) => {
     console.log(`READY: ${socket.id}, ${room}`);
-    rooms[room].users[socket.id].ready = true;
+    if(rooms.hasOwnProperty(room)){
+      rooms[room].users[socket.id].ready = true;
+    }
     updateRoom(room);
   });
 
