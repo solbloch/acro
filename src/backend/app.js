@@ -46,7 +46,6 @@ const connectUser = (socketid,room,name) => {
 
   // Note: this idiom exists in python (for else), but
   // not in JS. Maybe there's a bettter way?
-  j
   if(!reconnected){
     addUser(socketid,room,name);
   }
