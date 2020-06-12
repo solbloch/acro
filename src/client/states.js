@@ -27,7 +27,7 @@ function Answer({ room,roomState,name,socket }){
   const answerRef = useRef();
 
   const acroCheck = txt => {
-    let words = txt.replace(/[!?.,;:-]/g,'').trim().toUpperCase().split(/\s+/);
+    let words = txt.replace(/[!?.,;:+\"\'\-]/g,'').trim().toUpperCase().split(/\s+/);
     let matching = true;
     for(let i in roomState.acro){
       if(roomState.acro[i] != words[i][0]){
@@ -47,7 +47,7 @@ function Answer({ room,roomState,name,socket }){
       setErrorState('');
     }
     else {
-      setErrorState('Non-matching.');
+      setErrorState('Entry doesn\'t match given acronym.');
     }
   };
 
@@ -185,6 +185,7 @@ function End({ room,roomState,name,socket }){
 
   return(
     <div>
+      timer: {roomState.time} <br></br>
       winners: <br></br>
       <ol>
         {winners}

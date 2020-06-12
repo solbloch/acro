@@ -18,11 +18,11 @@ const newRoom = (room) => {
 
 const addUser = (socketid,room,name) => {
   rooms[room].users[socketid] = { 'name':name,
-                                     'points':0,
-                                     'vote':'',
-                                     'answer':'',
-                                     'connected':true,
-                                     'ready':false};
+                                  'points':0,
+                                  'vote':'',
+                                  'answer':'',
+                                  'connected':true,
+                                  'ready':false};
 }
 
 const connectUser = (socketid,room,name) => {
@@ -125,10 +125,14 @@ async function updateRoom(room) {
 }
 
 async function gameRun(room){
+  for(let user in rooms[room].users){
+    rooms[room].users[user].points = 0;
+  }
+
   // Once everyone is readied up.
 
   // Loop over 3 to final acro length.
-  for(let acroLength = 3; acroLength <= 7; acroLength++){
+  for(let acroLength = 3; acroLength <= 3; acroLength++){
     // Timer for answering.
     let timer = 0;
 
@@ -147,7 +151,7 @@ async function gameRun(room){
     // Timer for voting.
     rooms[room].state = 'vote';
 
-    for(timer = 40; timer > 0; timer--){
+    for(timer = 12 * Object.keys(rooms[room].users).length; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
       rooms[room].time = timer;
       if(everyConnected(room, user => user.vote.length > 0 )){
@@ -178,8 +182,22 @@ async function gameRun(room){
   }
 
   rooms[room].state = 'end';
+
+  for(timer = 15; timer > 0; timer--){
+    await new Promise(r => setTimeout(r,1000));
+    rooms[room].time = timer;
+    emitUpdate(room);
+  }
+
+  rooms[room].state = 'join';
   emitUpdate(room);
-  delete rooms[room];
+
+  for(let user in rooms[room].users){
+    rooms[room].users[user].ready = false;
+  }
+
+  emitUpdate(room);
+  // delete rooms[room];
 }
 
 io.attach(server, { });
@@ -223,7 +241,6 @@ io.on('connection', (socket) => {
       disconnectUser(socket.id, roomConnection, nameConnection);
     }
   });
-
 });
 
 server.listen(5000);
