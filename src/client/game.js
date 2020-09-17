@@ -2,7 +2,7 @@ import React, { useRef,useState,useEffect } from "react";
 import io from "socket.io-client";
 import { Answer, Join, Vote, ViewRound, End } from "./states";
 
-const socket = io('/ws');
+const socket = io('localhost:5000');
 
 function Game({ room,name }){
   const [roomState, setRoomState] = useState({});
@@ -72,16 +72,16 @@ function Game({ room,name }){
   }
 
   return (
-    <div>room id: {room} | name: {name}
-      <br></br>
-      {roomState.acro === '' ? '' : 'ACRO: ' + roomState.acro}
-      <br></br>
-      {renderGame()}
-      <br></br>
-      current point leaders: <br></br>
-      <ol>
-        {winners}
-      </ol>
+    <div id='game'>
+      <div id='roominfo'>room id: {room} | name: {name}</div>
+        {roomState.acro === '' ? '' : 'ACRO: ' + roomState.acro}
+        <br></br>
+        {renderGame()}
+        <br></br>
+        current point leaders: <br></br>
+        <ol>
+          {winners}
+        </ol>
     </div>
   );
 }

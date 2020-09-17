@@ -11,10 +11,9 @@ function Join({ onJoin }){
 
   return ( 
     <div>
-      <form onSubmit= {connect} >
-        <label>room id</label>
-        <input type="text" ref={roomName} /><br></br>
-        <label>name</label><input type="text" ref={name} />
+      <form id='join' onSubmit= {connect} >
+        <div>room<input type="text" ref={roomName} /></div>
+        <div>name<input type="text" ref={name} /></div>
         <input type="submit" value="Submit" />
       </form>
     </div>

@@ -1,21 +1,45 @@
 import React, { useRef,useState,useEffect } from "react";
+import Acrotest from "./acrotest";
 import io from "socket.io-client";
+
+function Options({ room,roomState,name,socket }){
+  return <Acrotest />
+}
 
 function Join({ room,roomState,name,socket }){
   const [readyState, setReadyState] = useState(false);
+  const [options, setOptions] = useState(false);
 
   const emitReady = () => {
     socket.emit('ready', room);
     setReadyState(true);
   }
+
+  const emitFreqList = (freqList) => {
+    socket.emit('updatefreqlist', room, socket.id, freqList);
+  }
+
   return (
-    <div>
+    <div id='users'>
       users joined: {Object.values(roomState.users).map(user => {
-        return <div>{user.name} - {user.ready ? 'ready' : 'not ready'}</div>; })}
-        <br></br>
-      <button onClick={emitReady}
-              disabled={readyState}>
-      ready</button>
+        return (
+          <div>
+            {user.admin ? <b>*{user.name}</b> : user.name} 
+              &nbsp;|&nbsp;
+            {user.ready ? 'ready' : 'not ready'}
+          </div>); 
+      })}
+      <button onClick={emitReady} disabled={readyState}>
+        Ready
+      </button>
+      { roomState.users[socket.id].admin ?
+      <button onClick={() => setOptions(!options)} disabled={readyState}>
+        Options </button> : <div></div>}
+      { options ? 
+        <Acrotest 
+          currentFreqList={roomState.freqList}
+          updateFunction={(freqList) => emitFreqList(freqList)} /> 
+        : <div></div> }
     </div>
   );
 }
@@ -56,17 +80,17 @@ function Answer({ room,roomState,name,socket }){
   };
 
   return (
-    <div>
-    timer: {roomState.time} <br></br>
-    {answered() ?
-      answerState : 
-      <form onSubmit={emitAnswer} >
-        <label>answer</label>
-        <input type="text" ref={answerRef} />
-      </form>
-     }
-    <div>{errorState}</div>
-    </div>);
+    <>
+      <div id='timer'>timer: {roomState.time}</div>
+      {answered() ?
+        answerState : 
+        <form onSubmit={emitAnswer} >
+          <label>answer</label>
+          <input type="text" ref={answerRef} />
+        </form>
+       }
+      <div>{errorState}</div>
+    </>);
 }
 
 
@@ -98,14 +122,12 @@ function Vote({ room,roomState,name,socket }){
   const buttonizeVoteable = (each) => {
     let [socketid,user] = each;
     if(socketid === socket.id || voteState){
-      return <div><button key={socketid} disabled='true' onClick={emitVote(socketid)}>
-               {user.answer}
-             </button></div>;
+      return <button key={socketid} disabled='true' onClick={emitVote(socketid)}>
+               {user.answer}</button>;
     }
     else {
-      return <div><button key={socketid} onClick={emitVote(socketid)}>
-               {user.answer}
-             </button></div>;
+      return <button key={socketid} onClick={emitVote(socketid)}>
+               {user.answer}</button>;
     }
   }
 
@@ -114,10 +136,10 @@ function Vote({ room,roomState,name,socket }){
   }
 
   return (
-    <div>
-      timer: {roomState.time} <br></br>
+    <>
+      <div id='timer'>timer: {roomState.time}</div>
       {voteButtons()}
-    </div>);
+    </>);
 }
 
 function ViewRound({ room,roomState,name,socket }){
@@ -165,12 +187,12 @@ function ViewRound({ room,roomState,name,socket }){
   }
 
   return (
-    <div>
-    timer: {roomState.time} <br></br>
-    <ol>
-    {returnPoints()}
-    </ol>
-    </div>
+    <>
+      <div id='timer'>timer: {roomState.time}</div>
+      <ol>
+      {returnPoints()}
+      </ol>
+    </>
   );
 }
 
@@ -184,13 +206,13 @@ function End({ room,roomState,name,socket }){
   });
 
   return(
-    <div>
-      timer: {roomState.time} <br></br>
+    <>
+      <div id='timer'>timer: {roomState.time}</div>
       winners: <br></br>
       <ol>
         {winners}
       </ol>
-    </div>
+    </>
   );
 }
 
