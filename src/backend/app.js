@@ -1,7 +1,7 @@
 const acronym = require("./acro");
 
 const io = require('socket.io')({
-  // path: '/ws',
+  path: '/ws',
   serveClient: false,
 });
 

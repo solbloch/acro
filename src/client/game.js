@@ -2,7 +2,7 @@ import React, { useRef,useState,useEffect } from "react";
 import io from "socket.io-client";
 import { Answer, Join, Vote, ViewRound, End } from "./states";
 
-const socket = io('localhost:5000');
+const socket = io('/ws');
 
 function Game({ room,name }){
   const [roomState, setRoomState] = useState({});
