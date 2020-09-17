@@ -1,7 +1,7 @@
 const acronym = require("./acro");
 
 const io = require('socket.io')({
-  path: '/ws',
+  // path: '/ws',
   serveClient: false,
 });
 
@@ -13,16 +13,39 @@ const newRoom = (room) => {
   if(rooms.hasOwnProperty(room)){
     return false;
   }
-  rooms[room] = { 'users':{}, 'acro':'', 'state':'join', 'time':0 };
+  rooms[room] = { 'users':{}, 'acro':'', 'state':'join', 'time':0, 
+    freqList: 
+    [['A',0.04566153846153849], ['B',0.03942153846153848], ['C',0.03942153846153848],
+    ['D',0.03942153846153848], ['E',0.04566153846153849], ['F',0.03942153846153848],
+    ['G',0.03942153846153848], ['H',0.03942153846153848], ['I',0.04566153846153849],
+    ['J',0.036301538461538475], ['K',0.03318153846153847], ['L',0.03942153846153848],
+    ['M',0.03942153846153848], ['N',0.03942153846153848], ['O',0.04566153846153849],
+    ['P',0.03942153846153848], ['Q',0.03318153846153847], ['R',0.03942153846153848],
+    ['S',0.03942153846153848], ['T',0.03942153846153848], ['U',0.03942153846153848],
+    ['V',0.03942153846153848], ['W',0.03942153846153848], ['X',0.02382153846153847],
+    ['Y',0.036301538461538475], ['Z',0.023821538461538456]]
+  };
 }
 
 const addUser = (socketid,room,name) => {
-  rooms[room].users[socketid] = { 'name':name,
-                                  'points':0,
-                                  'vote':'',
-                                  'answer':'',
-                                  'connected':true,
-                                  'ready':false};
+  if (Object.keys(rooms[room].users).length > 0){
+    rooms[room].users[socketid] = { 'name':name,
+                                    'admin':false,
+                                    'points':0,
+                                    'vote':'',
+                                    'answer':'',
+                                    'connected':true,
+                                    'ready':false};
+  }
+  else {
+    rooms[room].users[socketid] = { 'name':name,
+                                    'admin':true,
+                                    'points':0,
+                                    'vote':'',
+                                    'answer':'',
+                                    'connected':true,
+                                    'ready':false};
+  }
 }
 
 const connectUser = (socketid,room,name) => {
@@ -132,12 +155,12 @@ async function gameRun(room){
   // Once everyone is readied up.
 
   // Loop over 3 to final acro length.
-  for(let acroLength = 3; acroLength <= 3; acroLength++){
+  for(let acroLength = 3; acroLength <= 7; acroLength++){
     // Timer for answering.
     let timer = 0;
 
     rooms[room].state = 'answer';
-    rooms[room].acro = acronym.generateAcro(acroLength);
+    rooms[room].acro = acronym.generateAcro(acroLength,rooms[room].freqList);
 
     for(timer = rooms[room].acro.length * 15; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
@@ -206,12 +229,13 @@ io.on('connection', (socket) => {
   let nameConnection = '';
   let roomConnection = '';
 
-  console.log('bastard!',' ',socket.id);
+  console.log(`CONNECTION: ${socket.id}`);
 
   socket.on('join', (room, name) => {
     socket.join(room);
-    console.log('USER:', name, ' JOINED:', room);
     connectUser(socket.id,room,name);
+    console.log(`USER: ${name}, 
+      JOINED: ${room}, ADMIN: ${rooms[room].users[socket.id].admin}`);
     nameConnection = name;
     roomConnection = room;
   });
@@ -229,10 +253,20 @@ io.on('connection', (socket) => {
     rooms[room].users[socket.id].answer = answer;
   });
 
-
   socket.on('vote', (room, socketid, vote) => {
     console.log(`VOTE: ${socketid}, ${room}, ${vote}`);
     rooms[room].users[socketid].vote = vote;
+  });
+
+  socket.on('updatefreqlist', (room, socketid, freqList) => {
+    if(rooms[room].users[socketid].admin){
+      console.log(`FREQLISTUPDATE: ${socketid}, ${room}`);
+      rooms[room].freqList = freqList;
+      emitUpdate(room);
+    }
+    else {
+      console.log(`ATTEMPT??: ${socketid}, ${room}, ${freqList}`);
+    }
   });
 
   socket.on('disconnect', () => {
