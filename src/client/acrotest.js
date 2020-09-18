@@ -53,11 +53,17 @@ function generateNAcros(n,len,freqList){
   return output;
 }
 
-function letterButton( letter, freq, decCallback, incCallback ){
-  return (<div>
-    <button onClick={decCallback}>-</button> 
-      <progress id='freqProg' value={freq} max={2/26}></progress>
-    <button onClick={incCallback}>+</button>
+function letterButton( letter,freq,freqList,decCallback,incCallback ){
+  let maxFreq = freqList.map((i) => i[1]).reduce((a,b) => {
+    return Math.max(a,b);
+  });
+  return (
+    <div>
+      <button onClick={decCallback}>-</button> 
+        <progress id='freqProg' value={freq} 
+          max={maxFreq > (2/26) ? maxFreq : 2/26}></progress>
+      <button onClick={incCallback}>+</button>
+      [{letter},{freq}]
     </div>);
 }
 
@@ -79,7 +85,7 @@ function Acrotest({ currentFreqList, updateFunction }){
   <div className='tests'>
     <div className='testButtons'>
       {freqList.map((i) => 
-        {return letterButton(i[0], i[1], 
+        {return letterButton(i[0], i[1], freqList,
           ()=>{
             setFreqList(decLetter(i[0],freqList));
             updateFunction(freqList);

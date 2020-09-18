@@ -14,6 +14,7 @@ import './App.scss';
 function App(){
   const [room,setRoom] = useState('');
   const [name,setName] = useState('');
+  document.title = 'Acro';
 
   return (
     <div>
