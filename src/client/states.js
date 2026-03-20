@@ -76,6 +76,10 @@ function Answer({ room,roomState,name,socket }){
   const submittedRef = useRef(false);
   const lastCountdownRef = useRef(null);
 
+  useEffect(() => {
+    if (answerRef.current) answerRef.current.focus();
+  }, []);
+
   const acroCheck = txt => {
     let words = txt.replace(/[!?.,;:+\"\'\-]/g,'').trim().toUpperCase().split(/\s+/);
 

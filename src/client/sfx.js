@@ -75,38 +75,38 @@ export const setSfxMuted = (nextMuted) => {
 export const toggleSfxMuted = () => setSfxMuted(!muted);
 
 export const playReadySfx = () => {
-  playTone(560, 0.08, 0.03, 'square');
+  playTone(560, 0.08, 0.05, 'square');
 };
 
 export const playSendSfx = () => {
-  playTone(520, 0.06, 0.03, 'square');
-  playTone(780, 0.1, 0.028, 'triangle', 0.06);
+  playTone(520, 0.06, 0.05, 'square');
+  playTone(780, 0.1, 0.046, 'triangle', 0.06);
 };
 
 export const playVoteSfx = () => {
-  playTone(420, 0.06, 0.03, 'square');
-  playTone(620, 0.08, 0.028, 'square', 0.05);
+  playTone(420, 0.06, 0.05, 'square');
+  playTone(620, 0.08, 0.046, 'square', 0.05);
 };
 
 export const playCountdownSfx = () => {
-  playTone(880, 0.04, 0.025, 'triangle');
+  playTone(880, 0.04, 0.04, 'triangle');
 };
 
 export const playPhaseSfx = (phase) => {
   if (phase === 'answer') {
-    playTone(500, 0.08, 0.03, 'triangle');
-    playTone(660, 0.08, 0.03, 'triangle', 0.08);
+    playTone(500, 0.08, 0.05, 'triangle');
+    playTone(660, 0.08, 0.05, 'triangle', 0.08);
     return;
   }
 
   if (phase === 'vote') {
-    playTone(420, 0.08, 0.03, 'sawtooth');
-    playTone(560, 0.08, 0.03, 'sawtooth', 0.08);
+    playTone(420, 0.08, 0.05, 'sawtooth');
+    playTone(560, 0.08, 0.05, 'sawtooth', 0.08);
     return;
   }
 
   if (phase === 'viewround' || phase === 'end') {
-    playTone(700, 0.08, 0.03, 'triangle');
-    playTone(880, 0.1, 0.032, 'triangle', 0.08);
+    playTone(700, 0.08, 0.05, 'triangle');
+    playTone(880, 0.1, 0.054, 'triangle', 0.08);
   }
 };
