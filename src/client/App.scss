@@ -163,6 +163,12 @@ progress::-moz-progress-bar {
   padding-inline: 0;
 }
 
+.button--tiny {
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+}
+
 .field {
   display: grid;
   gap: 0.65rem;

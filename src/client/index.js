@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   BrowserRouter as Router,
@@ -8,12 +8,29 @@ import {
 import Game from "./game";
 import Join from "./join";
 import Acrotest from "./acrotest";
+import { unlockSfx } from "./sfx";
 import './App.scss';
 
 function App(){
   const [room,setRoom] = useState('');
   const [name,setName] = useState('');
   document.title = 'Acro';
+
+  useEffect(() => {
+    const unlock = () => {
+      unlockSfx();
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+
+    window.addEventListener('pointerdown', unlock);
+    window.addEventListener('keydown', unlock);
+
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, []);
 
   return (
     <div className='app-shell'>

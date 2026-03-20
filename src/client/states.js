@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import Acrotest from "./acrotest";
+import {
+  playCountdownSfx,
+  playReadySfx,
+  playSendSfx,
+  playVoteSfx,
+} from "./sfx";
 
 function Join({ room,roomState,name,socket }){
   const [readyState, setReadyState] = useState(false);
@@ -10,6 +16,7 @@ function Join({ room,roomState,name,socket }){
   const emitReady = () => {
     socket.emit('ready', room);
     setReadyState(true);
+    playReadySfx();
   }
 
   const emitFreqList = (freqList) => {
@@ -67,6 +74,7 @@ function Answer({ room,roomState,name,socket }){
   const [errorState, setErrorState] = useState('');
   const answerRef = useRef();
   const submittedRef = useRef(false);
+  const lastCountdownRef = useRef(null);
 
   const acroCheck = txt => {
     let words = txt.replace(/[!?.,;:+\"\'\-]/g,'').trim().toUpperCase().split(/\s+/);
@@ -93,6 +101,7 @@ function Answer({ room,roomState,name,socket }){
       submittedRef.current = true;
       setAnswerState(text);
       socket.emit('answer', room, name, text);
+      playSendSfx();
       setErrorState('');
       return true;
     }
@@ -119,6 +128,18 @@ function Answer({ room,roomState,name,socket }){
       trySubmit(answerRef.current.value.trim(), false);
     }
   }, [roomState.time]);
+
+  useEffect(() => {
+    if (
+      !answered() &&
+      roomState.time > 0 &&
+      roomState.time <= 3 &&
+      lastCountdownRef.current !== roomState.time
+    ) {
+      lastCountdownRef.current = roomState.time;
+      playCountdownSfx();
+    }
+  }, [roomState.time, answerState]);
 
   useEffect(() => {
     return () => {
@@ -153,6 +174,7 @@ function Answer({ room,roomState,name,socket }){
 function Vote({ room,roomState,name,socket }){
   // voteState true if voted, false otherwise.
   const [voteState, setVoteState] = useState(false);
+  const lastCountdownRef = useRef(null);
 
   const voteableList = Object.entries(roomState.users).filter(([socketid,user]) => {
     return user.answer.length > 0;
@@ -161,9 +183,22 @@ function Vote({ room,roomState,name,socket }){
   const emitVote = (vote) => {
     return () => {
       setVoteState(true);
-      socket.emit('vote', room, socket.id, vote)
+      socket.emit('vote', room, socket.id, vote);
+      playVoteSfx();
     };
   }
+
+  useEffect(() => {
+    if (
+      !voteState &&
+      roomState.time > 0 &&
+      roomState.time <= 3 &&
+      lastCountdownRef.current !== roomState.time
+    ) {
+      lastCountdownRef.current = roomState.time;
+      playCountdownSfx();
+    }
+  }, [roomState.time, voteState]);
 
   const buttonizeVoteable = (each) => {
     let [socketid,user] = each;

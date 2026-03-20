@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import { Answer, Join, Vote, ViewRound, End } from "./states";
+import { isSfxMuted, playPhaseSfx, toggleSfxMuted } from "./sfx";
 
 const socket = io('acro.solb.io', {
   path: '/ws/'});
 
 function Game({ room,name }){
   const [roomState, setRoomState] = useState({});
+  const [muted, setMuted] = useState(isSfxMuted());
+  const prevPhase = useRef('');
 
   useEffect(() => {
     const roomListener = (nextRoomState) => {
@@ -24,10 +27,29 @@ function Game({ room,name }){
     socket.emit('join', room, name);
   }, [room,name]);
 
+  useEffect(() => {
+    if (!roomState.state || prevPhase.current === roomState.state) {
+      return;
+    }
+
+    playPhaseSfx(roomState.state);
+    prevPhase.current = roomState.state;
+  }, [roomState.state]);
+
   const users = Object.values(roomState.users || {});
   const winners = users
     .slice()
     .sort((a,b) => b.points - a.points);
+
+  const totalRounds = 5;
+  const inRound = ['answer', 'vote', 'viewround', 'end'].includes(roomState.state);
+  const roundFromAcro = roomState.acro ? roomState.acro.length - 2 : 0;
+  const currentRound = inRound ? Math.max(1, Math.min(totalRounds, roundFromAcro)) : 0;
+  const roundLabel = currentRound > 0 ? `Round: ${currentRound}/${totalRounds}` : `Round: -/${totalRounds}`;
+
+  const onToggleMute = () => {
+    setMuted(toggleSfxMuted());
+  };
 
   const renderGame = () => {
     switch (roomState.state){
@@ -73,10 +95,14 @@ function Game({ room,name }){
       <section className='game-topbar panel'>
         <div className='game-topbar__main'>
           <h1 className='game-topbar__title'>Acro</h1>
+          <button className='button button--ghost button--tiny' type='button' onClick={onToggleMute}>
+            {muted ? 'Unmute' : 'Mute'}
+          </button>
         </div>
         <div className='game-topbar__meta'>
           <span className='meta-pill'>Room: {room}</span>
           <span className='meta-pill'>Name: {name}</span>
+          <span className='meta-pill'>{roundLabel}</span>
         </div>
       </section>
 
