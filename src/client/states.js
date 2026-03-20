@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Acrotest from "./acrotest";
 
 function Join({ room,roomState,name,socket }){
@@ -66,35 +66,67 @@ function Answer({ room,roomState,name,socket }){
   const [answerState, setAnswerState] = useState('');
   const [errorState, setErrorState] = useState('');
   const answerRef = useRef();
+  const submittedRef = useRef(false);
 
   const acroCheck = txt => {
     let words = txt.replace(/[!?.,;:+\"\'\-]/g,'').trim().toUpperCase().split(/\s+/);
-    let matching = true;
+
+    if (words.length !== roomState.acro.length) {
+      return false;
+    }
+
     for(let i in roomState.acro){
-      if(roomState.acro[i] != words[i][0]){
-        matching = false;
-        break;
+      if(!words[i] || roomState.acro[i] !== words[i][0]){
+        return false;
       }
     }
-    return matching;
+
+    return true;
   }
+
+  const trySubmit = (text, shouldSetError) => {
+    if (submittedRef.current || text.length === 0) {
+      return false;
+    }
+
+    if(acroCheck(text)){
+      submittedRef.current = true;
+      setAnswerState(text);
+      socket.emit('answer', room, name, text);
+      setErrorState('');
+      return true;
+    }
+
+    if (shouldSetError) {
+      setErrorState('Entry doesn\'t match given acronym.');
+    }
+
+    return false;
+  };
 
   const emitAnswer = e => {
     e.preventDefault();
     let text = answerRef.current.value;
-    if(acroCheck(text)){
-      setAnswerState(text);
-      socket.emit('answer', room, name, text);
-      setErrorState('');
-    }
-    else {
-      setErrorState('Entry doesn\'t match given acronym.');
-    }
+    trySubmit(text, true);
   };
 
   const answered = () => {
     return answerState.length > 0
   };
+
+  useEffect(() => {
+    if (roomState.time === 1 && answerRef.current) {
+      trySubmit(answerRef.current.value.trim(), false);
+    }
+  }, [roomState.time]);
+
+  useEffect(() => {
+    return () => {
+      if (answerRef.current) {
+        trySubmit(answerRef.current.value.trim(), false);
+      }
+    };
+  }, []);
 
   return (
     <div className='round-state'>
@@ -122,19 +154,9 @@ function Vote({ room,roomState,name,socket }){
   // voteState true if voted, false otherwise.
   const [voteState, setVoteState] = useState(false);
 
-  // Stolen from stackoverflow.
-  function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  const [voteableList, setVoteableList] = 
-    useState(shuffle(Object.entries(roomState.users).filter(([socketid,user]) => {
-      return user.answer.length > 0
-    })));
+  const voteableList = Object.entries(roomState.users).filter(([socketid,user]) => {
+    return user.answer.length > 0;
+  });
 
   const emitVote = (vote) => {
     return () => {

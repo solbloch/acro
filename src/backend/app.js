@@ -279,8 +279,13 @@ io.on('connection', (socket) => {
 
   socket.on('answer', (room, name, answer) => {
     console.log(`ANS: ${socket.id}, ${room}, ${answer}`);
-    if (roomExists(room) && rooms[room].users[socket.id]) {
+    if (
+      roomExists(room) &&
+      rooms[room].users[socket.id] &&
+      (rooms[room].state === 'answer' || rooms[room].state === 'vote')
+    ) {
       rooms[room].users[socket.id].answer = answer;
+      emitUpdate(room);
     }
   });
 
