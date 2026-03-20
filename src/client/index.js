@@ -3,8 +3,7 @@ import ReactDOM from "react-dom";
 import {
   BrowserRouter as Router,
   Switch,
-  Route,
-  Link
+  Route
 } from "react-router-dom";
 import Game from "./game";
 import Join from "./join";
@@ -17,7 +16,7 @@ function App(){
   document.title = 'Acro';
 
   return (
-    <div>
+    <div className='app-shell'>
       <Router>
         <Switch>
           <Route path='/test'>
@@ -36,4 +35,4 @@ function App(){
 );
 }
 
-ReactDOM.render(<App />, document.body);
+  ReactDOM.render(<App />, document.getElementById('root'));

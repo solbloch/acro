@@ -1,14 +1,11 @@
-import React, { useRef,useState,useEffect } from "react";
+import React, { useRef, useState } from "react";
 import Acrotest from "./acrotest";
-import io from "socket.io-client";
-
-function Options({ room,roomState,name,socket }){
-  return <Acrotest />
-}
 
 function Join({ room,roomState,name,socket }){
   const [readyState, setReadyState] = useState(false);
   const [options, setOptions] = useState(false);
+  const users = Object.values(roomState.users || {});
+  const currentUser = roomState.users ? roomState.users[socket.id] : null;
 
   const emitReady = () => {
     socket.emit('ready', room);
@@ -20,26 +17,46 @@ function Join({ room,roomState,name,socket }){
   }
 
   return (
-    <div id='users'>
-      users joined: {Object.values(roomState.users).map(user => {
-        return (
-          <div>
-            {user.admin ? <b>*{user.name}</b> : user.name} 
-              &nbsp;|&nbsp;
-            {user.ready ? 'ready' : 'not ready'}
-          </div>); 
-      })}
-      <button onClick={emitReady} disabled={readyState}>
-        Ready
-      </button>
-      { roomState.users[socket.id].admin ?
-      <button onClick={() => setOptions(!options)} disabled={readyState}>
-        Options </button> : <div></div>}
-      { options ? 
-        <Acrotest 
+    <div className='round-state round-state--lobby'>
+      <div className='panel__header'>
+        <h2>Players</h2>
+      </div>
+
+      <div className='roster'>
+        {users.map((user) => (
+          <div className='roster__item' key={user.name}>
+            <div className='roster__identity'>
+              <strong>{user.name}</strong>
+              {user.admin ? <span className='status-chip status-chip--accent'>host</span> : null}
+            </div>
+            <span className={`status-chip ${user.ready ? 'status-chip--success' : 'status-chip--muted'}`}>
+              {user.ready ? 'ready' : 'waiting'}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className='action-row'>
+        <button className='button button--primary' onClick={emitReady} disabled={readyState}>
+          {readyState ? 'Ready' : 'Ready'}
+        </button>
+        {currentUser && currentUser.admin ? (
+          <button
+            className='button button--ghost'
+            onClick={() => setOptions(!options)}
+            disabled={readyState}
+          >
+            {options ? 'Hide options' : 'Options'}
+          </button>
+        ) : null}
+      </div>
+
+      {options ? (
+        <Acrotest
           currentFreqList={roomState.freqList}
-          updateFunction={(freqList) => emitFreqList(freqList)} /> 
-        : <div></div> }
+          updateFunction={(freqList) => emitFreqList(freqList)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -80,17 +97,24 @@ function Answer({ room,roomState,name,socket }){
   };
 
   return (
-    <>
-      <div id='timer'>timer: {roomState.time}</div>
+    <div className='round-state'>
+      <div className='timer-badge'>{roomState.time}</div>
+      <div className='acro-focus' aria-label='Current acronym'>
+        {roomState.acro}
+      </div>
+
       {answered() ?
-        answerState : 
-        <form onSubmit={emitAnswer} >
-          <label>answer</label>
-          <input type="text" ref={answerRef} />
+        <div className='submission-card'>
+          <span className='status-chip status-chip--success'>sent</span>
+          <strong>{answerState}</strong>
+        </div> : 
+        <form className='stack-form' onSubmit={emitAnswer} >
+          <input type="text" ref={answerRef} placeholder='Your answer' aria-label='Answer input' />
+          <button className='button button--primary' type='submit'>Send</button>
         </form>
        }
-      <div>{errorState}</div>
-    </>);
+      {errorState ? <div className='form-error'>{errorState}</div> : null}
+    </div>);
 }
 
 
@@ -122,11 +146,11 @@ function Vote({ room,roomState,name,socket }){
   const buttonizeVoteable = (each) => {
     let [socketid,user] = each;
     if(socketid === socket.id || voteState){
-      return <button key={socketid} disabled='true' onClick={emitVote(socketid)}>
+      return <button className='vote-card' key={socketid} disabled={true} onClick={emitVote(socketid)}>
                {user.answer}</button>;
     }
     else {
-      return <button key={socketid} onClick={emitVote(socketid)}>
+      return <button className='vote-card' key={socketid} onClick={emitVote(socketid)}>
                {user.answer}</button>;
     }
   }
@@ -136,10 +160,15 @@ function Vote({ room,roomState,name,socket }){
   }
 
   return (
-    <>
-      <div id='timer'>timer: {roomState.time}</div>
-      {voteButtons()}
-    </>);
+    <div className='round-state'>
+      <div className='timer-badge'>{roomState.time}</div>
+      <div className='panel__header'>
+        <h2>Vote</h2>
+      </div>
+      <div className='vote-grid'>
+        {voteButtons()}
+      </div>
+    </div>);
 }
 
 function ViewRound({ room,roomState,name,socket }){
@@ -181,18 +210,21 @@ function ViewRound({ room,roomState,name,socket }){
     let sortedList = Object.entries(voteNum).sort((a,b) => b[1] - a[1]);
 
     return sortedList.map(user => {
-      return <li>{roomState.users[user[0]].name} got {user[1]} with {roomState.users[user[0]].answer}</li>;
+      return <li className='result-list__item' key={user[0]}>{roomState.users[user[0]].name} +{user[1]} {roomState.users[user[0]].answer}</li>;
     });
 
   }
 
   return (
-    <>
-      <div id='timer'>timer: {roomState.time}</div>
-      <ol>
+    <div className='round-state'>
+      <div className='timer-badge'>{roomState.time}</div>
+      <div className='panel__header'>
+        <h2>Round</h2>
+      </div>
+      <ol className='result-list'>
       {returnPoints()}
       </ol>
-    </>
+    </div>
   );
 }
 
@@ -200,19 +232,21 @@ function End({ room,roomState,name,socket }){
   let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
 
   let winners = sorted.map(user => {
-    return <li key={user.name}>
-      user: {user.name} has {user.points} points
+    return <li className='result-list__item' key={user.name}>
+      {user.name} {user.points}
       </li>; 
   });
 
   return(
-    <>
-      <div id='timer'>timer: {roomState.time}</div>
-      winners: <br></br>
-      <ol>
+    <div className='round-state'>
+      <div className='timer-badge'>{roomState.time}</div>
+      <div className='panel__header'>
+        <h2>Final</h2>
+      </div>
+      <ol className='result-list'>
         {winners}
       </ol>
-    </>
+    </div>
   );
 }
 

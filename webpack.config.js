@@ -12,6 +12,9 @@ module.exports = {
   entry: {
     client: "./src/client/index.js",
   },
+  output: {
+    hashFunction: "sha256",
+  },
   module: {
     rules: [
       {
@@ -28,6 +31,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       chunks: ["client"],
+      template: "./src/client/index.html",
     }),
   ],
 };

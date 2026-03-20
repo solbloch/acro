@@ -1,25 +1,16 @@
-import React, { useRef,useState,useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { Answer, Join, Vote, ViewRound, End } from "./states";
 
-const socket = io('acro.solb.io', {
+const socket = io('http://10.0.0.8:5000', {
   path: '/ws/'});
 
 function Game({ room,name }){
   const [roomState, setRoomState] = useState({});
-  const [winners, setWinners] = useState([]);
 
   useEffect(() => {
-    const roomListener = (roomState) => {
-      setRoomState(roomState);
-
-      let sorted = Object.values(roomState.users).sort((a,b) => {return b.points - a.points});
-
-      setWinners(sorted.map(user => {
-        return <li key={user.name}>
-                 {user.name} has {user.points} points!
-               </li>;
-      }));
+    const roomListener = (nextRoomState) => {
+      setRoomState(nextRoomState);
     };
 
     socket.on('updateRoom', roomListener);
@@ -27,11 +18,16 @@ function Game({ room,name }){
     return () => {
       socket.off('updateRoom', roomListener);
     };
-  }, [roomState, winners]);
+  }, []);
 
   useEffect(() => {
     socket.emit('join', room, name);
   }, [room,name]);
+
+  const users = Object.values(roomState.users || {});
+  const winners = users
+    .slice()
+    .sort((a,b) => b.points - a.points);
 
   const renderGame = () => {
     switch (roomState.state){
@@ -73,17 +69,41 @@ function Game({ room,name }){
   }
 
   return (
-    <div id='game'>
-      <div id='roominfo'>room id: {room} | name: {name}</div>
-        {roomState.acro === '' ? '' : 'ACRO: ' + roomState.acro}
-        <br></br>
-        {renderGame()}
-        <br></br>
-        current point leaders: <br></br>
-        <ol>
-          {winners}
-        </ol>
-    </div>
+    <main className='game-shell'>
+      <section className='game-topbar panel'>
+        <div className='game-topbar__main'>
+          <h1 className='game-topbar__title'>Acro</h1>
+        </div>
+        <div className='game-topbar__meta'>
+          <span className='meta-pill'>Room: {room}</span>
+          <span className='meta-pill'>Name: {name}</span>
+        </div>
+      </section>
+
+      <section className='game-layout'>
+        <div className='panel panel--round'>
+          {renderGame()}
+        </div>
+
+        <aside className='panel panel--sidebar'>
+          <div className='panel__header'>
+            <h2>Scores</h2>
+          </div>
+
+          <ol className='leaderboard'>
+            {winners.map((user, index) => (
+              <li className='leaderboard__item' key={user.name}>
+                <span className='leaderboard__rank'>#{index + 1}</span>
+                <div className='leaderboard__copy'>
+                  <strong>{user.name}</strong>
+                  <span>{user.points}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      </section>
+    </main>
   );
 }
 

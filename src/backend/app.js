@@ -8,9 +8,10 @@ const io = require('socket.io')({
 const server = require('http').createServer();
 
 const rooms = {};
+const roomExists = (room) => Object.prototype.hasOwnProperty.call(rooms, room);
 
 const newRoom = (room) => {
-  if(rooms.hasOwnProperty(room)){
+  if(roomExists(room)){
     return false;
   }
   rooms[room] = { 'users':{}, 'acro':'', 'state':'join', 'time':0, 
@@ -49,7 +50,7 @@ const addUser = (socketid,room,name) => {
 }
 
 const connectUser = (socketid,room,name) => {
-  if (!rooms.hasOwnProperty(room)){
+  if (!roomExists(room)){
     newRoom(room); 
   }
 
@@ -77,7 +78,7 @@ const connectUser = (socketid,room,name) => {
 }
 
 const disconnectUser = (socketid,room,name) => {
-  if(rooms.hasOwnProperty(room)){
+  if(roomExists(room)){
     if (rooms[room].users.hasOwnProperty(socketid)) { 
 
       rooms[room].users[socketid].connected = false;
@@ -140,6 +141,10 @@ const emitUpdate = (room) => {
 }
 
 async function updateRoom(room) {
+  if (!roomExists(room)) {
+    return;
+  }
+
   emitUpdate(room);
   if(Object.keys(rooms[room].users).length > 1 &&
     everyConnected(room, user => user.ready )){
@@ -148,6 +153,10 @@ async function updateRoom(room) {
 }
 
 async function gameRun(room){
+  if (!roomExists(room)) {
+    return;
+  }
+
   for(let user in rooms[room].users){
     rooms[room].users[user].points = 0;
   }
@@ -156,6 +165,10 @@ async function gameRun(room){
 
   // Loop over 3 to final acro length.
   for(let acroLength = 3; acroLength <= 7; acroLength++){
+    if (!roomExists(room)) {
+      return;
+    }
+
     // Timer for answering.
     let timer = 0;
 
@@ -164,6 +177,9 @@ async function gameRun(room){
 
     for(timer = rooms[room].acro.length * 15; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
+      if (!roomExists(room)) {
+        return;
+      }
       rooms[room].time = timer;
       if(everyConnected(room, user => user.answer.length > 0 )){
         break;
@@ -176,6 +192,9 @@ async function gameRun(room){
 
     for(timer = 12 * Object.keys(rooms[room].users).length; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
+      if (!roomExists(room)) {
+        return;
+      }
       rooms[room].time = timer;
       if(everyConnected(room, user => user.vote.length > 0 )){
         break;
@@ -191,6 +210,9 @@ async function gameRun(room){
 
     for(timer = 10; timer > 0; timer--){
       await new Promise(r => setTimeout(r,1000));
+      if (!roomExists(room)) {
+        return;
+      }
       rooms[room].time = timer;
       emitUpdate(room);
     }
@@ -208,8 +230,15 @@ async function gameRun(room){
 
   for(timer = 15; timer > 0; timer--){
     await new Promise(r => setTimeout(r,1000));
+    if (!roomExists(room)) {
+      return;
+    }
     rooms[room].time = timer;
     emitUpdate(room);
+  }
+
+  if (!roomExists(room)) {
+    return;
   }
 
   rooms[room].state = 'join';
@@ -242,7 +271,7 @@ io.on('connection', (socket) => {
 
   socket.on('ready', (room) => {
     console.log(`READY: ${socket.id}, ${room}`);
-    if(rooms.hasOwnProperty(room)){
+    if(roomExists(room) && rooms[room].users[socket.id]){
       rooms[room].users[socket.id].ready = true;
     }
     updateRoom(room);
@@ -250,16 +279,20 @@ io.on('connection', (socket) => {
 
   socket.on('answer', (room, name, answer) => {
     console.log(`ANS: ${socket.id}, ${room}, ${answer}`);
-    rooms[room].users[socket.id].answer = answer;
+    if (roomExists(room) && rooms[room].users[socket.id]) {
+      rooms[room].users[socket.id].answer = answer;
+    }
   });
 
   socket.on('vote', (room, socketid, vote) => {
     console.log(`VOTE: ${socketid}, ${room}, ${vote}`);
-    rooms[room].users[socketid].vote = vote;
+    if (roomExists(room) && rooms[room].users[socketid]) {
+      rooms[room].users[socketid].vote = vote;
+    }
   });
 
   socket.on('updatefreqlist', (room, socketid, freqList) => {
-    if(rooms[room].users[socketid].admin){
+    if(roomExists(room) && rooms[room].users[socketid] && rooms[room].users[socketid].admin){
       console.log(`FREQLISTUPDATE: ${socketid}, ${room}`);
       rooms[room].freqList = freqList;
       emitUpdate(room);

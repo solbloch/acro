@@ -58,47 +58,54 @@ function letterButton( letter,freq,freqList,decCallback,incCallback ){
     return Math.max(a,b);
   });
   return (
-    <div>
-      <button onClick={decCallback}>-</button> 
-        <progress id='freqProg' value={freq} 
-          max={maxFreq > (2/26) ? maxFreq : 2/26}></progress>
-      <button onClick={incCallback}>+</button>
-      [{letter},{freq}]
+    <div className='freq-card' key={letter}>
+      <div className='freq-card__header'>
+        <strong>{letter}</strong>
+        <span>{freq.toFixed(3)}</span>
+      </div>
+      <progress className='freq-card__meter' value={freq} 
+        max={maxFreq > (2/26) ? maxFreq : 2/26}></progress>
+      <div className='freq-card__actions'>
+        <button className='button button--ghost button--icon' onClick={decCallback}>-</button>
+        <button className='button button--ghost button--icon' onClick={incCallback}>+</button>
+      </div>
     </div>);
-}
-
-function copy(text){
-  let input = document.createElement("input");
-  input.style.opacity="0";
-  input.style["pointer-events"] = "none";
-  document.body.appendChild(input);
-  input.value = text;
-  input.focus();
-  input.select();
-  document.execCommand('copy');
 }
 
 function Acrotest({ currentFreqList, updateFunction }){
   const [freqList, setFreqList] = useState(currentFreqList);
 
+  const updateFreqList = (nextFreqList) => {
+    setFreqList(nextFreqList);
+
+    if (updateFunction) {
+      updateFunction(nextFreqList);
+    }
+  };
+
   return (
-  <div className='tests'>
+  <section className='tests'>
+    <div className='panel__header'>
+      <p className='eyebrow'>Host options</p>
+      <h2>Tune letter frequency</h2>
+    </div>
     <div className='testButtons'>
       {freqList.map((i) => 
         {return letterButton(i[0], i[1], freqList,
           ()=>{
-            setFreqList(decLetter(i[0],freqList));
-            updateFunction(freqList);
+            updateFreqList(decLetter(i[0],freqList));
           }, 
           ()=>{
-            setFreqList(incLetter(i[0],freqList));
-            updateFunction(freqList);
+            updateFreqList(incLetter(i[0],freqList));
           })})}
     </div>
     <div className='exampleAcros'>
-      { generateNAcros(40,5,freqList).map((i)=> <div>{i}</div>) }
+      <p className='eyebrow'>Preview</p>
+      <div className='exampleAcros__grid'>
+        { generateNAcros(40,5,freqList).map((i, index)=> <div className='exampleAcros__item' key={`${i}-${index}`}>{i}</div>) }
+      </div>
     </div>
-  </div>
+  </section>
   );
 }
 
