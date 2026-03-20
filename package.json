@@ -5,10 +5,10 @@
   "main": "index.js",
   "author": "Mr. Bloch",
   "scripts": {
-    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack --mode=production",
-    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server",
+    "build": "webpack --mode=production",
+    "dev": "webpack-dev-server",
     "server": "node dist/server.js",
-    "watch": "NODE_OPTIONS=--openssl-legacy-provider webpack --watch"
+    "watch": "webpack --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
