@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { Answer, Join, Vote, ViewRound, End } from "./states";
 
-const socket = io('http://10.0.0.8:5000', {
+const socket = io('acro.solb.io', {
   path: '/ws/'});
 
 function Game({ room,name }){
